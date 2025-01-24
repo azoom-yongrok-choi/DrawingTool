@@ -8,5 +8,13 @@ export default defineNuxtConfig({
     dirs: ['composables/**',
       'components/**',
     ]
+  },
+  ssr: true,
+  app: {
+    baseURL: '/CursorTest1/', // GitHub 저장소 이름으로 변경하세요
+    buildAssetsDir: 'assets'
+  },
+  nitro: {
+    preset: 'github-pages'
   }
 })
