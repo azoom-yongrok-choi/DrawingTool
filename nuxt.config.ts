@@ -16,5 +16,8 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'github-pages'
-  }
+  },
+  plugins: [
+    '~/plugins/i18n.ts'
+  ]
 })

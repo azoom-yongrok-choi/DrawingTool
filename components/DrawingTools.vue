@@ -1,13 +1,16 @@
 <template>
   <div class="tools">
-    <button 
-      v-for="tool in tools" 
-      :key="tool.name"
-      :class="{ active: selectedTool === tool.name }"
-      @click="$emit('select-tool', tool.name)"
-    >
-      {{ tool.icon }}
-    </button>
+    <div class="tool-group">
+      <button 
+        v-for="tool in tools" 
+        :key="tool.name"
+        :class="{ active: selectedTool === tool.name }"
+        @click="$emit('select-tool', tool.name)"
+      >
+        {{ tool.icon }} {{ $t(`tools.${tool.name}`) }}
+      </button>
+    </div>
+
     <div class="brush-size" v-if="selectedTool === 'brush'">
       <input 
         type="range" 
@@ -15,8 +18,9 @@
         min="1" 
         max="50"
       />
-      <span class="size-display">{{ strokeWidth }}px</span>
+      <span class="size-display">{{ strokeWidth }}{{ $t('settings.px') }}</span>
     </div>
+
     <div class="tolerance-slider" v-if="selectedTool === 'magicwand'">
       <input 
         type="range" 
@@ -25,29 +29,47 @@
         max="100"
         step="1"
       />
-      <span class="tolerance-display">허용치: {{ colorTolerance }}%</span>
+      <span class="tolerance-display">{{ $t('settings.tolerance') }}: {{ colorTolerance }}{{ $t('settings.percent') }}</span>
     </div>
-    <input 
-      type="color" 
-      v-model="strokeColor"
-    />
-    <label class="file-input">
-      🖼️
+
+    <div class="tool-group">
       <input 
-        type="file" 
-        accept="image/*" 
-        @change="$emit('upload-image', $event)"
-        style="display: none"
+        type="color" 
+        v-model="strokeColor"
       />
-    </label>
-    <button @click="$emit('undo')" :disabled="!canUndo">↩️</button>
-    <button @click="$emit('redo')" :disabled="!canRedo">↪️</button>
-    <button @click="$emit('clear')">🗑️</button>
+      <label class="file-input">
+        {{ $t('tools.upload') }}
+        <input 
+          type="file" 
+          accept="image/*" 
+          @change="$emit('upload-image', $event)"
+          style="display: none"
+        />
+      </label>
+      <button @click="$emit('undo')" :disabled="!canUndo">{{ $t('tools.undo') }}</button>
+      <button @click="$emit('redo')" :disabled="!canRedo">{{ $t('tools.redo') }}</button>
+      <button @click="$emit('clear')">{{ $t('tools.clear') }}</button>
+    </div>
+
+    <div class="language-selector">
+      <select v-model="currentLocale">
+        <option value="ko">{{ $t('language.ko') }}</option>
+        <option value="en">{{ $t('language.en') }}</option>
+        <option value="ja">{{ $t('language.ja') }}</option>
+      </select>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+const currentLocale = computed({
+  get: () => locale.value,
+  set: (value) => locale.value = value
+})
 
 const props = defineProps({
   tools: {
@@ -120,48 +142,55 @@ const colorTolerance = computed({
   justify-content: center;
 }
 
-.brush-size {
+.tool-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.brush-size, .tolerance-slider {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 8px;
 }
 
-.brush-size input[type="range"] {
+input[type="range"] {
   width: 100px;
   accent-color: #81C784;
 }
 
-.size-display {
+.size-display, .tolerance-display {
   font-size: 12px;
   color: #2E7D32;
   min-width: 45px;
 }
 
-.tools button {
+button {
   padding: 8px 12px;
   border: 2px solid #81C784;
   background: white;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.tools button:disabled {
+button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tools button:hover:not(:disabled) {
+button:hover:not(:disabled) {
   background: #C8E6C9;
 }
 
-.tools button.active {
+button.active {
   background: #81C784;
   color: white;
 }
 
-.tools input[type="color"] {
+input[type="color"] {
   width: 40px;
   height: 40px;
   padding: 0;
@@ -180,27 +209,27 @@ const colorTolerance = computed({
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .file-input:hover {
   background: #C8E6C9;
 }
 
-.tolerance-slider {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 8px;
+.language-selector {
+  margin-left: auto;
 }
 
-.tolerance-slider input[type="range"] {
-  width: 100px;
-  accent-color: #81C784;
+.language-selector select {
+  padding: 8px;
+  border: 2px solid #81C784;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.tolerance-display {
-  font-size: 12px;
-  color: #2E7D32;
-  min-width: 80px;
+.language-selector select:hover {
+  background: #C8E6C9;
 }
 </style> 
