@@ -1,0 +1,42 @@
+{
+  "settings": {
+    "brushSize": "Kích thước bút",
+    "toleranceSlider": "Điều chỉnh dung sai",
+    "colorPicker": "Chọn màu",
+    "language": "Chọn ngôn ngữ",
+    "px": "px",
+    "percent": "%",
+    "tolerance": "Dung sai"
+  },
+  "tools": {
+    "brush": "Bút vẽ",
+    "eraser": "Tẩy",
+    "magicwand": "Đũa phép",
+    "upload": "Tải ảnh lên",
+    "undo": "Hoàn tác",
+    "redo": "Làm lại",
+    "clear": "Xóa tất cả"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "vi": "Tiếng Việt"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "calculator": "Máy tính",
+    "drawing": "Bảng vẽ"
+  },
+  "welcome": {
+    "title": "Bộ sưu tập ứng dụng dễ thương",
+    "calculatorDesc": "Hãy thử tính toán với chiếc máy tính dễ thương này!",
+    "drawingDesc": "Vẽ tự do với công cụ vẽ này!"
+  },
+  "calculator": {
+    "title": "Máy tính dễ thương"
+  },
+  "drawing": {
+    "title": "Bảng vẽ dễ thương"
+  }
+} 

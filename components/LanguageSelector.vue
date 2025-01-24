@@ -4,6 +4,7 @@
       <option value="ko">{{ $t('language.ko') }}</option>
       <option value="en">{{ $t('language.en') }}</option>
       <option value="ja">{{ $t('language.ja') }}</option>
+      <option value="vi">{{ $t('language.vi') }}</option>
     </select>
   </div>
 </template>
