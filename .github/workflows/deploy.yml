@@ -29,5 +29,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .output/public
-          cname: ${{ secrets.CNAME }}  # 필요한 경우 CNAME 설정 
+          publish_dir: .output/public 
