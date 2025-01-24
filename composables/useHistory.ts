@@ -1,78 +1,116 @@
-interface DrawingItem {
+export type LineItem = {
   id: number;
+  type: 'line';
   points: number[];
-  type: 'line' | 'magicwand';
   color?: string;
   width?: number;
-  image?: HTMLImageElement;
-  imageData?: ImageData;
 }
+
+export type MagicWandItem = {
+  id: number;
+  type: 'magicwand';
+  image: HTMLImageElement;
+  color: string;
+}
+
+export type DrawingItem = LineItem | MagicWandItem;
 
 class DrawingHistory {
   private history: DrawingItem[][] = []
-  private step: number = -1
+  private currentIndex = 0
 
   constructor() {
     // 초기 빈 상태 추가
-    this.push([])
+    this.history.push([])
   }
 
   get canUndo(): boolean {
-    return this.step > 0
+    return this.currentIndex > 0
   }
 
   get canRedo(): boolean {
-    return this.step < this.history.length - 1
+    return this.currentIndex < this.history.length - 1
   }
 
-  get currentState(): DrawingItem[] {
-    if (this.step === -1) return []
-    return this.history[this.step].map(item => {
-      const newItem = {...item}
-      if (item.image) {
-        newItem.image = item.image
-      }
-      if (item.imageData) {
-        newItem.imageData = item.imageData
-      }
-      return newItem
-    })
-  }
+  push(state: DrawingItem[]) {
+    // 현재 상태가 마지막 상태와 동일하다면 무시
+    if (this.currentIndex >= 0 && 
+        JSON.stringify(this.history[this.currentIndex]) === JSON.stringify(state)) {
+      return
+    }
 
-  push(state: DrawingItem[]): void {
-    this.step++
-    this.history.length = this.step + 1
-    this.history[this.step] = state.map(item => {
-      const newItem = {...item}
-      if (item.image) {
-        newItem.image = item.image
+    // 현재 상태의 깊은 복사본 생성
+    const deepCopy = state.map(item => {
+      if (item.type === 'line') {
+        return {
+          ...item,
+          points: [...item.points],
+        } as LineItem
+      } else {
+        return {
+          ...item,
+        } as MagicWandItem
       }
-      if (item.imageData) {
-        newItem.imageData = item.imageData
-      }
-      return newItem
     })
+
+    // 현재 인덱스 이후의 기록 삭제
+    this.history = this.history.slice(0, this.currentIndex + 1)
+    
+    // 새로운 상태 추가
+    this.history.push(deepCopy)
+    this.currentIndex++
   }
 
   undo(): DrawingItem[] {
-    if (!this.canUndo) return this.currentState
-    this.step--
-    return this.currentState
+    if (this.canUndo) {
+      this.currentIndex--
+      return this.history[this.currentIndex].map(item => {
+        if (item.type === 'line') {
+          return {
+            ...item,
+            points: [...item.points],
+          }
+        }
+        return { ...item }
+      })
+    }
+    return []
   }
 
   redo(): DrawingItem[] {
-    if (!this.canRedo) return this.currentState
-    this.step++
-    return this.currentState
+    if (this.canRedo) {
+      this.currentIndex++
+      return this.history[this.currentIndex].map(item => {
+        if (item.type === 'line') {
+          return {
+            ...item,
+            points: [...item.points],
+          }
+        }
+        return { ...item }
+      })
+    }
+    return this.history[this.currentIndex] || []
   }
 
-  clear(): void {
-    this.push([])
+  clear() {
+    this.history = [[]]  // 빈 배열을 초기 상태로 설정
+    this.currentIndex = 0  // 초기 상태의 인덱스는 0
+  }
+
+  getCurrentState(): DrawingItem[] {
+    return this.history[this.currentIndex]?.map(item => {
+      if (item.type === 'line') {
+        return {
+          ...item,
+          points: [...item.points],
+        }
+      }
+      return { ...item }
+    }) || []
   }
 }
 
 export const useHistory = () => {
   return new DrawingHistory()
-}
-
-export type { DrawingItem } 
+} 

@@ -1,38 +1,22 @@
 <template>
   <div class="drawing-board">
-    <div class="tools">
-      <button 
-        v-for="tool in tools" 
-        :key="tool.name"
-        :class="{ active: selectedTool === tool.name }"
-        @click="selectTool(tool.name)"
-      >
-        {{ tool.icon }}
-      </button>
-      <div class="brush-size">
-        <input 
-          type="range" 
-          v-model="strokeWidth" 
-          min="1" 
-          max="50"
-          :disabled="selectedTool === 'eraser'"
-        />
-        <span class="size-display">{{ strokeWidth }}px</span>
-      </div>
-      <input type="color" v-model="strokeColor" />
-      <label class="file-input">
-        🖼️
-        <input 
-          type="file" 
-          accept="image/*" 
-          @change="handleImageUpload"
-          style="display: none"
-        />
-      </label>
-      <button @click="undo">↩️</button>
-      <button @click="redo">↪️</button>
-      <button @click="clearCanvas">🗑️</button>
-    </div>
+    <DrawingTools
+      :tools="tools"
+      :selected-tool="selectedTool"
+      :stroke-width="strokeWidth"
+      :stroke-color="strokeColor"
+      :color-tolerance="colorTolerance"
+      :can-undo="canUndo"
+      :can-redo="canRedo"
+      @select-tool="selectTool"
+      @update:stroke-width="strokeWidth = $event"
+      @update:stroke-color="strokeColor = $event"
+      @update:color-tolerance="colorTolerance = $event"
+      @upload-image="handleImageUpload"
+      @undo="undo"
+      @redo="redo"
+      @clear="clearCanvas"
+    />
     <v-stage
       ref="stageRef"
       :config="stageConfig"
@@ -56,7 +40,7 @@
               y: 0,
               width: stageConfig.width,
               height: stageConfig.height,
-              opacity: 0.5
+              opacity: 0.7
             }"
           />
         </template>
@@ -80,9 +64,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { useHistory, type DrawingItem } from '~/composables/useHistory'
+import { useHistory, type DrawingItem, type LineItem, type MagicWandItem } from '~/composables/useHistory'
 import { simplifyLine } from '~/composables/useLineSimplification'
 import { floodFill } from '~/composables/useFloodFill'
+import DrawingTools from '~/components/DrawingTools.vue'
 
 const stageConfig = reactive({
   width: 800,
@@ -98,6 +83,7 @@ const tools = [
 const selectedTool = ref('brush')
 const strokeColor = ref('#000000')
 const strokeWidth = ref(5)
+const colorTolerance = ref(30)
 const isDrawing = ref(false)
 
 const lines = ref<DrawingItem[]>([])
@@ -107,8 +93,24 @@ const lastPointerPosition = ref<{x: number, y: number} | null>(null)
 
 // 히스토리 관리자 초기화
 const drawingHistory = useHistory()
-const canUndo = computed(() => drawingHistory.canUndo)
-const canRedo = computed(() => drawingHistory.canRedo)
+
+// 히스토리 상태를 추적하기 위한 ref
+const historyState = ref({
+  canUndo: false,
+  canRedo: false
+})
+
+// 히스토리 상태 업데이트 함수
+const updateHistoryState = () => {
+  historyState.value = {
+    canUndo: drawingHistory.canUndo,
+    canRedo: drawingHistory.canRedo
+  }
+}
+
+// computed 속성을 ref로 변경
+const canUndo = computed(() => historyState.value.canUndo)
+const canRedo = computed(() => historyState.value.canRedo)
 
 // 포인트 간 최소 거리 (이 거리보다 가까운 포인트는 무시)
 const MIN_DISTANCE = 3
@@ -130,81 +132,59 @@ const backgroundImageConfig = ref({
 })
 
 const selectTool = (tool: string) => {
+  // 그리기 중이었다면 현재 선 최적화 및 히스토리 업데이트
+  if (isDrawing.value) {
+    isDrawing.value = false
+    lastPointerPosition.value = null
+    
+    const lastLine = lines.value[lines.value.length - 1]
+    if (lastLine?.type === 'line' && lastLine.points.length > 4) {
+      const optimizedPoints = simplifyLine(lastLine.points)
+      lines.value = [
+        ...lines.value.slice(0, -1),
+        { ...lastLine, points: optimizedPoints } as LineItem
+      ]
+    }
+    updateHistory()
+  }
+  
   selectedTool.value = tool
 }
 
 const updateHistory = () => {
-  console.log('Updating history:', lines.value)
   drawingHistory.push([...lines.value])
-  console.log('Current history state:', drawingHistory.currentState)
-  console.log('Can undo:', drawingHistory.canUndo)
-  console.log('Can redo:', drawingHistory.canRedo)
+  updateHistoryState()
 }
 
 const handleMouseDown = async (e: any) => {
+  isDrawing.value = true
   const stage = e.target.getStage()
   const pos = stage.getPointerPosition()
-
+  
   if (selectedTool.value === 'magicwand') {
-    // 현재 스테이지의 전체 상태를 캡처
-    const dataURL = stage.toDataURL()
-    const img = new Image()
-    img.src = dataURL
-
-    await new Promise(resolve => { img.onload = resolve })
-
-    // 임시 캔버스 생성 및 현재 상태 그리기
-    const tempCanvas = document.createElement('canvas')
-    tempCanvas.width = stage.width()
-    tempCanvas.height = stage.height()
-    const ctx = tempCanvas.getContext('2d')
-    if (!ctx) return
-
-    // 현재 스테이지 상태 그리기
-    ctx.drawImage(img, 0, 0)
-
-    // 현재 픽셀의 이미지 데이터 가져오기
-    const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height)
-
-    // RGB 색상 변환
-    const color = strokeColor.value
-    const r = parseInt(color.slice(1, 3), 16)
-    const g = parseInt(color.slice(3, 5), 16)
-    const b = parseInt(color.slice(5, 7), 16)
-
-    // 플러드 필 실행
-    const filledImageData = floodFill(imageData, Math.round(pos.x), Math.round(pos.y), {
-      r, g, b, a: 1
-    })
-
-    // 결과를 새 이미지로 변환
-    ctx.putImageData(filledImageData, 0, 0)
-
-    // 이미지를 Konva.Image로 변환하여 추가
-    const imageObj = new Image()
-    imageObj.src = tempCanvas.toDataURL()
-    await new Promise(resolve => { imageObj.onload = resolve })
-
-    // 새로운 매직완드 작업 추가
-    const newMagicWand: DrawingItem = {
-      id: Date.now(),
-      points: [0, 0, stage.width(), stage.height()],
-      image: imageObj,
-      type: 'magicwand',
-      imageData: filledImageData
+    const resultImage = await floodFill(
+      stage, 
+      pos, 
+      colorTolerance.value, 
+      strokeColor.value
+    )
+    if (resultImage) {
+      lines.value = [...lines.value, {
+        id: Date.now(),
+        type: 'magicwand',
+        image: resultImage,
+        color: strokeColor.value
+      } as MagicWandItem]
+      updateHistory()
     }
-
-    // 상태 업데이트 및 히스토리 저장
-    lines.value = [...lines.value, newMagicWand]
-    updateHistory()
+    isDrawing.value = false
     return
   }
 
-  isDrawing.value = true
   lastPointerPosition.value = pos
   
   // 새로운 선 추가
-  const newLine: DrawingItem = {
+  const newLine: LineItem = {
     id: Date.now(),
     points: [pos.x, pos.y],
     color: selectedTool.value === 'eraser' ? '#ffffff' : strokeColor.value,
@@ -213,7 +193,6 @@ const handleMouseDown = async (e: any) => {
   }
   
   lines.value = [...lines.value, newLine]
-  // mouseDown에서는 히스토리 업데이트하지 않음
 }
 
 const handleMouseMove = (e: any) => {
@@ -229,12 +208,14 @@ const handleMouseMove = (e: any) => {
   }
 
   const lastLine = lines.value[lines.value.length - 1]
+  if (lastLine.type !== 'line') return
+
   const newPoints = [...lastLine.points, currentPosition.x, currentPosition.y]
   
   // 새 배열을 생성하여 상태 업데이트
   lines.value = [
     ...lines.value.slice(0, -1),
-    { ...lastLine, points: newPoints }
+    { ...lastLine, points: newPoints } as LineItem
   ]
   
   lastPointerPosition.value = currentPosition
@@ -248,31 +229,33 @@ const handleMouseUp = () => {
   
   // 마지막 선 최적화
   const lastLine = lines.value[lines.value.length - 1]
-  if (lastLine && lastLine.points.length > 4) {
+  if (lastLine?.type === 'line' && lastLine.points.length > 4) {
     const optimizedPoints = simplifyLine(lastLine.points)
     lines.value = [
       ...lines.value.slice(0, -1),
-      { ...lastLine, points: optimizedPoints }
+      { ...lastLine, points: optimizedPoints } as LineItem
     ]
   }
   
-  // mouseUp에서만 히스토리 업데이트
   updateHistory()
 }
 
 const undo = () => {
   const previousState = drawingHistory.undo()
-  lines.value = previousState
+  lines.value = [...previousState]
+  updateHistoryState()
 }
 
 const redo = () => {
   const nextState = drawingHistory.redo()
-  lines.value = nextState
+  lines.value = [...nextState]
+  updateHistoryState()
 }
 
 const clearCanvas = () => {
   lines.value = []
   drawingHistory.clear()
+  updateHistoryState()
 }
 
 const updateBackgroundImageConfig = (img: HTMLImageElement) => {
@@ -338,6 +321,9 @@ const drawingLayers = computed(() => {
 
 // 컴포넌트 마운트 시 캔버스 크기 조정
 onMounted(() => {
+  // 히스토리 상태 초기화
+  updateHistoryState()
+
   const updateSize = () => {
     if (!stageRef.value?.$el) return
     const container = stageRef.value.$el.parentElement
@@ -354,7 +340,7 @@ onMounted(() => {
 <style scoped>
 .drawing-board {
   width: 100%;
-  height: calc(100vh - 40px); /* 상하 여백 20px씩 */
+  height: calc(100vh - 40px);
   background: white;
   border-radius: 15px;
   overflow: hidden;
@@ -363,86 +349,9 @@ onMounted(() => {
   margin: 20px;
 }
 
-.tools {
-  padding: 10px 20px; /* 좌우 패딩 증가 */
-  background: #E8F5E9;
-  display: flex;
-  gap: 10px;
-  border-bottom: 2px solid #81C784;
-  align-items: center;
-  flex-wrap: wrap; /* 도구가 많을 때 줄바꿈 */
-  justify-content: center; /* 중앙 정렬 */
-}
-
-.brush-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 8px;
-}
-
-.brush-size input[type="range"] {
-  width: 100px;
-  accent-color: #81C784;
-}
-
-.size-display {
-  font-size: 12px;
-  color: #2E7D32;
-  min-width: 45px;
-}
-
-.tools button {
-  padding: 8px 12px;
-  border: 2px solid #81C784;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tools button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.tools button:hover:not(:disabled) {
-  background: #C8E6C9;
-}
-
-.tools button.active {
-  background: #81C784;
-  color: white;
-}
-
-.tools input[type="color"] {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 2px solid #81C784;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 v-stage {
   flex: 1;
   width: 100%;
   height: 100%;
-}
-
-.file-input {
-  padding: 8px 12px;
-  border: 2px solid #81C784;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.file-input:hover {
-  background: #C8E6C9;
 }
 </style> 
