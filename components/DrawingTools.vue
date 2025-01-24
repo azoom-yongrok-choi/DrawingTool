@@ -80,7 +80,7 @@ const props = defineProps({
     required: true
   }
 })
-console.log(props.canUndo, props.canRedo)
+
 const emit = defineEmits([
   'select-tool',
   'update:stroke-width',

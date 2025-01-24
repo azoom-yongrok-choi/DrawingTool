@@ -259,31 +259,36 @@ const clearCanvas = () => {
 }
 
 const updateBackgroundImageConfig = (img: HTMLImageElement) => {
-  const container = stageRef.value.$el.parentElement
-  const containerWidth = container.offsetWidth
-  const containerHeight = container.offsetHeight
+  const containerWidth = stageConfig.width
+  const containerHeight = stageConfig.height
 
   const imageRatio = img.width / img.height
   const containerRatio = containerWidth / containerHeight
 
-  let scale = 1
-  let offsetX = 0
-  let offsetY = 0
+  let width = 0
+  let height = 0
+  let x = 0
+  let y = 0
 
+  // 이미지 비율에 따라 크기 조정
   if (imageRatio > containerRatio) {
-    scale = containerWidth / img.width
-    offsetY = (containerHeight - (img.height * scale)) / 2
+    // 이미지가 더 넓은 경우
+    width = containerWidth
+    height = containerWidth / imageRatio
+    y = (containerHeight - height) / 2
   } else {
-    scale = containerHeight / img.height
-    offsetX = (containerWidth - (img.width * scale)) / 2
+    // 이미지가 더 높은 경우
+    height = containerHeight
+    width = containerHeight * imageRatio
+    x = (containerWidth - width) / 2
   }
 
   backgroundImageConfig.value = {
     image: img,
-    width: img.width * scale,
-    height: img.height * scale,
-    x: offsetX,
-    y: offsetY
+    width,
+    height,
+    x,
+    y
   }
 }
 
@@ -326,32 +331,69 @@ onMounted(() => {
 
   const updateSize = () => {
     if (!stageRef.value?.$el) return
-    const container = stageRef.value.$el.parentElement
+    
+    // drawing-container를 찾음
+    const container = stageRef.value.$el.closest('.drawing-container')
     if (!container) return
-    stageConfig.width = container.offsetWidth
-    stageConfig.height = container.offsetHeight
+    
+    // DrawingTools의 높이를 구함
+    const toolsElement = document.querySelector('.tools')
+    const toolsHeight = toolsElement ? toolsElement.getBoundingClientRect().height : 0
+    
+    // drawing-container의 실제 사용 가능한 크기 계산
+    const containerRect = container.getBoundingClientRect()
+    stageConfig.width = containerRect.width
+    stageConfig.height = containerRect.height - toolsHeight - 20 // 20은 margin-bottom 값
+
+    // 배경 이미지가 있다면 크기 업데이트
+    if (backgroundImage.value) {
+      updateBackgroundImageConfig(backgroundImage.value)
+    }
   }
   
   updateSize()
   window.addEventListener('resize', updateSize)
+
+  // 컴포넌트 언마운트 시 이벤트 리스너 제거
+  return () => {
+    window.removeEventListener('resize', updateSize)
+  }
 })
 </script>
 
 <style scoped>
 .drawing-board {
   width: 100%;
-  height: calc(100vh - 40px);
+  height: 100%;  /* 100vh에서 100%로 변경 */
   background: white;
   border-radius: 15px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: 20px;
+  box-sizing: border-box;
+  overflow: hidden;  /* 오버플로우 방지 */
 }
 
+/* DrawingTools 영역 */
+.drawing-board > :deep(.tools) {
+  flex: 0 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* v-stage 영역 */
 v-stage {
   flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
   width: 100%;
-  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Konva 스테이지 컨테이너 */
+v-stage :deep(.konvajs-content) {
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box;
 }
 </style> 
