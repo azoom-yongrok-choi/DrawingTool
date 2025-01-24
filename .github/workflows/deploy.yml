@@ -18,12 +18,13 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
         run: |
-          npm install -g yarn
-          yarn set version stable
-          yarn install --frozen-lockfile
-          yarn add @rollup/rollup-linux-x64-gnu
+          yarn install
+          yarn add -D @rollup/rollup-linux-x64-gnu
 
       - name: Generate static files
         run: yarn generate
