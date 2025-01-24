@@ -1,13 +1,13 @@
 <template>
   <nav class="navigation">
     <NuxtLink to="/" class="nav-button">
-      🏠 홈
+      🏠 {{ $t('navigation.home') }}
     </NuxtLink>
     <NuxtLink to="/calculator" class="nav-button">
-      🧮 계산기
+      🧮 {{ $t('navigation.calculator') }}
     </NuxtLink>
     <NuxtLink to="/drawing" class="nav-button">
-      🎨 그림판
+      🎨 {{ $t('navigation.drawing') }}
     </NuxtLink>
   </nav>
 </template>

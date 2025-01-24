@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "brushSize": "ブラシサイズ",
+    "toleranceSlider": "許容値調整",
+    "colorPicker": "カラーピッカー",
+    "language": "言語選択",
+    "px": "px",
+    "percent": "%",
+    "tolerance": "許容値"
+  },
+  "tools": {
+    "brush": "ブラシ",
+    "eraser": "消しゴム",
+    "magicwand": "マジックワンド",
+    "upload": "画像アップロード",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "clear": "すべて消去"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "calculator": "電卓",
+    "drawing": "お絵描き"
+  },
+  "welcome": {
+    "title": "かわいいアプリコレクション",
+    "calculatorDesc": "かわいい電卓で計算してみましょう！",
+    "drawingDesc": "自由にお絵描きを楽しもう！"
+  },
+  "calculator": {
+    "title": "かわいい電卓"
+  },
+  "drawing": {
+    "title": "かわいいお絵描きツール"
+  }
+} 

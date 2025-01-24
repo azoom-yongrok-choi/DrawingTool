@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "brushSize": "Brush Size",
+    "toleranceSlider": "Tolerance Adjustment",
+    "colorPicker": "Color Picker",
+    "language": "Select Language",
+    "px": "px",
+    "percent": "%",
+    "tolerance": "Tolerance"
+  },
+  "tools": {
+    "brush": "Brush",
+    "eraser": "Eraser",
+    "magicwand": "Magic Wand",
+    "upload": "Upload Image",
+    "undo": "Undo",
+    "redo": "Redo",
+    "clear": "Clear All"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "navigation": {
+    "home": "Home",
+    "calculator": "Calculator",
+    "drawing": "Drawing"
+  },
+  "welcome": {
+    "title": "Cute App Collection",
+    "calculatorDesc": "Try calculations with this cute calculator!",
+    "drawingDesc": "Draw freely with this drawing tool!"
+  },
+  "calculator": {
+    "title": "Cute Calculator"
+  },
+  "drawing": {
+    "title": "Cute Drawing Board"
+  }
+} 

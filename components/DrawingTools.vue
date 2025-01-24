@@ -17,6 +17,7 @@
         v-model.number="strokeWidth"
         min="1" 
         max="50"
+        :aria-label="$t('settings.brushSize')"
       />
       <span class="size-display">{{ strokeWidth }}{{ $t('settings.px') }}</span>
     </div>
@@ -28,6 +29,7 @@
         min="0" 
         max="100"
         step="1"
+        :aria-label="$t('settings.toleranceSlider')"
       />
       <span class="tolerance-display">{{ $t('settings.tolerance') }}: {{ colorTolerance }}{{ $t('settings.percent') }}</span>
     </div>
@@ -36,6 +38,7 @@
       <input 
         type="color" 
         v-model="strokeColor"
+        :aria-label="$t('settings.colorPicker')"
       />
       <label class="file-input">
         {{ $t('tools.upload') }}
@@ -46,13 +49,13 @@
           style="display: none"
         />
       </label>
-      <button @click="$emit('undo')" :disabled="!canUndo">{{ $t('tools.undo') }}</button>
-      <button @click="$emit('redo')" :disabled="!canRedo">{{ $t('tools.redo') }}</button>
-      <button @click="$emit('clear')">{{ $t('tools.clear') }}</button>
+      <button @click="$emit('undo')" :disabled="!canUndo" :aria-label="$t('tools.undo')">{{ $t('tools.undo') }}</button>
+      <button @click="$emit('redo')" :disabled="!canRedo" :aria-label="$t('tools.redo')">{{ $t('tools.redo') }}</button>
+      <button @click="$emit('clear')" :aria-label="$t('tools.clear')">{{ $t('tools.clear') }}</button>
     </div>
 
     <div class="language-selector">
-      <select v-model="currentLocale">
+      <select v-model="currentLocale" :aria-label="$t('settings.language')">
         <option value="ko">{{ $t('language.ko') }}</option>
         <option value="en">{{ $t('language.en') }}</option>
         <option value="ja">{{ $t('language.ja') }}</option>

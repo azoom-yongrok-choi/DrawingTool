@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "brushSize": "브러시 크기",
+    "toleranceSlider": "허용 오차 조절",
+    "colorPicker": "색상 선택",
+    "language": "언어 선택",
+    "px": "px",
+    "percent": "%",
+    "tolerance": "허용 오차"
+  },
+  "tools": {
+    "brush": "브러시",
+    "eraser": "지우개",
+    "magicwand": "마법봉",
+    "upload": "이미지 업로드",
+    "undo": "실행 취소",
+    "redo": "다시 실행",
+    "clear": "모두 지우기"
+  },
+  "language": {
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "navigation": {
+    "home": "홈",
+    "calculator": "계산기",
+    "drawing": "그림판"
+  },
+  "welcome": {
+    "title": "귀여운 앱 모음",
+    "calculatorDesc": "귀여운 계산기로 계산해보세요!",
+    "drawingDesc": "자유롭게 그림을 그려보세요!"
+  },
+  "calculator": {
+    "title": "귀여운 계산기"
+  },
+  "drawing": {
+    "title": "귀여운 그림판"
+  }
+} 

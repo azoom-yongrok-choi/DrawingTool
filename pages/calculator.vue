@@ -3,7 +3,7 @@
     <div class="calculator">
       <h1>
         <span class="star left">🌟</span>
-        귀여운 계산기
+        {{ $t('calculator.title') }}
         <span class="star right">🌟</span>
       </h1>
       <div class="calculator-inner">

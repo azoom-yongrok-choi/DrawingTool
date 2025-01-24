@@ -3,19 +3,19 @@
     <div class="welcome-content">
     <h1>
         <span class="star left">🌟</span>
-        귀여운 앱 모음
+        {{ $t('welcome.title') }}
         <span class="star right">🌟</span>
     </h1>
     <div class="app-cards">
         <NuxtLink to="/calculator" class="app-card">
         <div class="app-icon">🧮</div>
-        <h2>계산기</h2>
-        <p>귀여운 계산기로 계산해보세요!</p>
+        <h2>{{ $t('navigation.calculator') }}</h2>
+        <p>{{ $t('welcome.calculatorDesc') }}</p>
         </NuxtLink>
         <NuxtLink to="/drawing" class="app-card">
         <div class="app-icon">🎨</div>
-        <h2>그림판</h2>
-        <p>자유롭게 그림을 그려보세요!</p>
+        <h2>{{ $t('navigation.drawing') }}</h2>
+        <p>{{ $t('welcome.drawingDesc') }}</p>
         </NuxtLink>
     </div>
     <div class="kawaii-footer">

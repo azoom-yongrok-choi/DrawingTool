@@ -2,7 +2,7 @@
   <div class="drawing-page">
     <h1>
       <span class="star left">🌟</span>
-      귀여운 그림판
+      {{ $t('drawing.title') }}
       <span class="star right">🌟</span>
     </h1>
     <div class="drawing-container">
