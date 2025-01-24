@@ -2,10 +2,12 @@
   <div>
     <NuxtPage />
     <Navigation />
+    <LanguageSelector />
   </div>
 </template>
 
 <script setup>
+import LanguageSelector from '~/components/LanguageSelector.vue'
 const { display, addNumber, clear, addOperator, calculate } = useCalculator()
 </script>
 

@@ -53,26 +53,11 @@
       <button @click="$emit('redo')" :disabled="!canRedo" :aria-label="$t('tools.redo')">{{ $t('tools.redo') }}</button>
       <button @click="$emit('clear')" :aria-label="$t('tools.clear')">{{ $t('tools.clear') }}</button>
     </div>
-
-    <div class="language-selector">
-      <select v-model="currentLocale" :aria-label="$t('settings.language')">
-        <option value="ko">{{ $t('language.ko') }}</option>
-        <option value="en">{{ $t('language.en') }}</option>
-        <option value="ja">{{ $t('language.ja') }}</option>
-      </select>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { locale } = useI18n()
-const currentLocale = computed({
-  get: () => locale.value,
-  set: (value) => locale.value = value
-})
+import { computed } from 'vue'
 
 const props = defineProps({
   tools: {
@@ -216,23 +201,6 @@ input[type="color"] {
 }
 
 .file-input:hover {
-  background: #C8E6C9;
-}
-
-.language-selector {
-  margin-left: auto;
-}
-
-.language-selector select {
-  padding: 8px;
-  border: 2px solid #81C784;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.language-selector select:hover {
   background: #C8E6C9;
 }
 </style> 
