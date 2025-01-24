@@ -9,9 +9,9 @@ export default defineNuxtConfig({
       'components/**',
     ]
   },
-  ssr: true,
+  ssr: false,
   app: {
-    baseURL: '/CursorTest1/', // GitHub 저장소 이름으로 변경하세요
+    baseURL: '/DrawingTool/', // GitHub 저장소 이름으로 변경
     buildAssetsDir: 'assets'
   },
   nitro: {
